@@ -1,15 +1,20 @@
 import chalk from 'chalk';
-import { deleteAllHubspotContacts, getHubspotContacts } from './hubspotService.js';
+import {
+  deleteAllHubspotContacts,
+  getHubspotContacts,
+  postHubspotContacts,
+} from './hubspotService.js';
 import { clearLogs, log, saveLogs } from './logger.js';
 import { closeInput, getInput } from './utils.js';
 import { getFilteredNetflexContacts } from './netflexUtils.js';
-import { getAllHubspotContactIds } from './hubspotUtils.js';
+import { getAllHubspotContactIds, getHubspotContactsBasedOnNetflex } from './hubspotUtils.js';
+import { HubspotContact, NetflexContact } from './types.js';
 
 // HubSpot batch only accepts 100 records per request so we need to apply a limit and send data in batches
 const BATCH_LIMIT = 100;
 
-let hubspotContacts = [];
-let netflexContacts = [];
+let hubspotContacts: HubspotContact[][] = [];
+let netflexContacts: NetflexContact[][] = [];
 
 const mainMenu = async () => {
   while (true) {
@@ -46,8 +51,18 @@ const mainMenu = async () => {
         saveLogs('delete_hubspot_contacts');
         break;
       case '4':
+        console.log(chalk.magenta('Please wait...'));
+        clearLogs();
+        for (let i = 0; i < netflexContacts.length; i++) {
+          const contacts = netflexContacts[i];
+          const hubspotContacts = getHubspotContactsBasedOnNetflex(contacts);
+          postHubspotContacts(hubspotContacts);
+        }
+        saveLogs('contacts_log_sync');
+        console.log(chalk.green('Netflex contacts successfully synced with HubSpot!'));
         break;
       case '5':
+        console.log(chalk.magenta('Please wait...'));
         break;
       case '0':
         console.log(chalk.yellow('👋 Exiting...'));
@@ -61,18 +76,6 @@ const mainMenu = async () => {
 
 // Start the application
 mainMenu();
-
-// clearLogs();
-// // for (let i = 0; i < netflexContactsList.length; i++) {
-//   const contacts = netflexContactsList[2];
-//   const hubspotContacts = getHubspotContactsBasedOnNetflex(contacts);
-//   postHubspotContacts(hubspotContacts);
-// // }
-// saveLogs('contacts_log_sync');
-
-// clearLogs();
-// const hubspotContacts = await getHubspotContacts();
-// saveLogs('get_hubspot_contacts');
 
 // // HubSpot batch only accepts 100 records per request so we need to apply a limit and send data in batches
 // const hubspotContactIds = hubspotContacts.map((contact) => contact.id);

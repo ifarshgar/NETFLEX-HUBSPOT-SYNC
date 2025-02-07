@@ -1,7 +1,7 @@
 import { getNetflexAuthTokens, getNetflexContacts } from './netflexService.js';
 
 export const getFilteredNetflexContacts = async (
-  createdAfter = '2000-01-01T00:00:00',
+  createdAfter = '2025-01-28T00:00:00',
   BATCH_LIMIT = 100
 ) => {
   const netflexAuthTokens = await getNetflexAuthTokens();

@@ -1,5 +1,5 @@
-import { log } from 'console';
 import { CONFIG } from './config.js';
+import { log } from './logger.js';
 import { NetflexAuthResponse, NetflexAuthTokens, NetflexContact } from './types.js';
 
 const NetflexAuthUrl = 'https://api.bergenchamber.netflexapp.com/v1/auth';

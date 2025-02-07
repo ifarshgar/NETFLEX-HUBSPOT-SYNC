@@ -28,7 +28,7 @@ export const getHubspotContactsBasedOnNetflex = (contacts: NetflexContact[]): Hu
       idProperty: 'netflex_contact_id',
       properties: {
         netflex_contact_id: contact.id,
-        email: 'ff@ff.ff',
+        email: contact.email,
         firstname: name.firstname,
         lastname: name.lastname,
         phone: contact.phone,

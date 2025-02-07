@@ -96,9 +96,9 @@ export const postHubspotContacts = async (contacts: HubspotContact[]) => {
     inputs: [...contacts],
   };
 
-  console.log('Posting the following contacts to HubSpot:');
-  console.log(bodyData['inputs']);
-  console.log('------------------------------------------');
+  log('Posting the following contacts to HubSpot:');
+  log(bodyData);
+  log('------------------------------------------');
 
   try {
     const response = await fetch(HubspotPostContactsUrl, {
@@ -111,16 +111,21 @@ export const postHubspotContacts = async (contacts: HubspotContact[]) => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.log('HubSpot API error');
-      console.log(errorData.message);
-      console.log('response status: ' + response.status.toString());
-      throw new Error(`HubSpot API error: ${errorData.message || response.status}`);
+       log('------------------------------------------');
+       log('Failed to post HubSpot contacts.');
+       log(`HTTP error! Status: ${response.status.toString()}`);
+       log('------------------------------------------');
+       return;
+       
+      // const errorData = await response.json();
+      // console.log('HubSpot API error');
+      // console.log(errorData.message);
+      // console.log('response status: ' + response.status.toString());
+      // throw new Error(`HubSpot API error: ${errorData.message || response.status}`);
     }
 
     const responseData = await response.json();
-    console.log('Netflex contacts successfully synced with HubSpot!');
-    console.log(responseData);
+    log(responseData);
   } catch (error) {
     console.log('Failed to post Netflex contacts to HubSpot.');
     console.log(error.toString());
