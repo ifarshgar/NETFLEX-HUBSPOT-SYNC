@@ -1,3 +1,4 @@
+import { log } from 'console';
 import { CONFIG } from './config.js';
 import { NetflexAuthResponse, NetflexAuthTokens, NetflexContact } from './types.js';
 
@@ -34,6 +35,35 @@ export const getNetflexAuthTokens = async () => {
 };
 
 export const getNetflexContacts = async (authTokens: NetflexAuthTokens) => {
+  const credentials = btoa(`${authTokens.public_key}:${authTokens.private_key}`);
+
+  try {
+    const response = await fetch(NetflexContactsUrl, {
+      method: 'GET',
+      headers: {
+        Authorization: `Basic ${credentials}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      log('------------------------------------------');
+      log('Failed to get Netflex contacts.');
+      log(`HTTP error! Status: ${response.status.toString()}`);
+      log('------------------------------------------');
+      return;
+    }
+
+    const data = await response.json();
+    const contacts: NetflexContact[] = data.entries;
+    log(contacts);
+    return contacts;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const getNetflexCompanies = async (authTokens: NetflexAuthTokens) => {
   const credentials = btoa(`${authTokens.public_key}:${authTokens.private_key}`);
 
   try {

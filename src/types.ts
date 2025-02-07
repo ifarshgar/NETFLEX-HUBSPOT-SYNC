@@ -55,8 +55,11 @@ export type HubspotContact = {
     hs_object_id?: string;
     lastmodifieddate?: string;
     lastname: string;
+    netflex_contact_id: string;
+    phone: string;
+    website: string;
   };
+  archived: boolean;
   createdAt?: string;
   updatedAt?: string;
-  archived: boolean;
 };
