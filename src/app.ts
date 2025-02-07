@@ -22,8 +22,11 @@ const mainMenu = async () => {
     console.log('1- Get all HubSpot contacts');
     console.log('2- Get all Netflex contacts');
     console.log('3- Delete all HubSpot contacts');
-    console.log('4- Sync all Netflex contacts to HubSpot contacts');
-    console.log('5- Sync all Netflex companies to HubSpot companies');
+    console.log('4- Get all HubSpot companies');
+    console.log('5- Get all Netflex companies');
+    console.log('6- Delete all HubSpot companies');
+    console.log('7- Sync all Netflex contacts to HubSpot contacts');
+    console.log('8- Sync all Netflex companies to HubSpot companies');
     console.log('0- Exit');
 
     const choice = (await getInput(chalk.yellow('👉 Enter your choice: '))) as string;
@@ -52,6 +55,15 @@ const mainMenu = async () => {
         break;
       case '4':
         console.log(chalk.magenta('Please wait...'));
+        break;
+      case '5':
+        console.log(chalk.magenta('Please wait...'));
+        break;
+      case '6':
+        console.log(chalk.magenta('Please wait...'));
+        break;
+      case '7':
+        console.log(chalk.magenta('Please wait...'));
         clearLogs();
         for (let i = 0; i < netflexContacts.length; i++) {
           const contacts = netflexContacts[i];
@@ -61,7 +73,7 @@ const mainMenu = async () => {
         saveLogs('contacts_log_sync');
         console.log(chalk.green('Netflex contacts successfully synced with HubSpot!'));
         break;
-      case '5':
+      case '8':
         console.log(chalk.magenta('Please wait...'));
         break;
       case '0':
