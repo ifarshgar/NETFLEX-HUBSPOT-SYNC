@@ -22,13 +22,14 @@ export const getNameForHubspot = (name: string) => {
 export const getHubspotContactsBasedOnNetflex = (contacts: NetflexContact[]): HubspotContact[] =>
   contacts.map((contact) => {
     const name = getNameForHubspot(contact.name);
+    const email= typeof contact.email === 'string' ? contact.email.trim() : '';
 
     const hubspotContact: HubspotContact = {
       id: contact.id,
       idProperty: 'netflex_contact_id',
       properties: {
         netflex_contact_id: contact.id,
-        email: contact.email,
+        email: email,
         firstname: name.firstname,
         lastname: name.lastname,
         phone: contact.phone,

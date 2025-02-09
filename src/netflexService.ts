@@ -1,11 +1,15 @@
 import { CONFIG } from './config.js';
-import { log } from './logger.js';
-import { NetflexAuthResponse, NetflexAuthTokens, NetflexContact } from './types.js';
+import { createLogger } from './logger.js';
+import { NetflexAuthResponse, NetflexAuthTokens, NetflexCompany, NetflexContact } from './types.js';
 
 const NetflexAuthUrl = 'https://api.bergenchamber.netflexapp.com/v1/auth';
 const NetflexContactsUrl = 'https://api.bergenchamber.netflexapp.com/v1/builder/structures/10001';
+const NetflexCompaniesUrl = 'https://api.bergenchamber.netflexapp.com/v1/builder/structures/10002';
 
 export const getNetflexAuthTokens = async () => {
+  const logger = createLogger('get_netflex_auth_tokens');
+  logger.info('Getting Netflex Auth tokens...');
+
   const credentials = btoa(`${CONFIG.NETFLEX_USERNAME}:${CONFIG.NETFLEX_PASSWORD}`);
 
   try {
@@ -18,6 +22,9 @@ export const getNetflexAuthTokens = async () => {
     });
 
     if (!response.ok) {
+      logger.error(
+        'Failed to get Netflex auth tokens.' + '\n' + `HTTP error! Status: ${response.status}`
+      );
       throw new Error(
         'Failed to get Netflex auth tokens.' + '\n' + `HTTP error! Status: ${response.status}`
       );
@@ -28,13 +35,17 @@ export const getNetflexAuthTokens = async () => {
       private_key: data[0].private_key,
       public_key: data[0].public_key,
     };
+    logger.info('Netflex Auth tokens were successfully acquired.');
     return authTokens;
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };
 
 export const getNetflexContacts = async (authTokens: NetflexAuthTokens) => {
+  const logger = createLogger('get_netflex_contacts');
+  logger.info('Getting Netflex contacts...');
+
   const credentials = btoa(`${authTokens.public_key}:${authTokens.private_key}`);
 
   try {
@@ -47,27 +58,31 @@ export const getNetflexContacts = async (authTokens: NetflexAuthTokens) => {
     });
 
     if (!response.ok) {
-      log('------------------------------------------');
-      log('Failed to get Netflex contacts.');
-      log(`HTTP error! Status: ${response.status.toString()}`);
-      log('------------------------------------------');
+      logger.error('------------------------------------------');
+      logger.error('Failed to get Netflex contacts.');
+      logger.error(`HTTP error! Status: ${response.status.toString()}`);
+      logger.error('------------------------------------------');
       return;
     }
 
     const data = await response.json();
     const contacts: NetflexContact[] = data.entries;
-    log(contacts);
+    logger.info('Netflex contacts were fetched successfully.');
+    logger.verbose(contacts);
     return contacts;
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };
 
 export const getNetflexCompanies = async (authTokens: NetflexAuthTokens) => {
+  const logger = createLogger('get_netflex_companies');
+  logger.info('Getting Netflex companies...');
+
   const credentials = btoa(`${authTokens.public_key}:${authTokens.private_key}`);
 
   try {
-    const response = await fetch(NetflexContactsUrl, {
+    const response = await fetch(NetflexCompaniesUrl, {
       method: 'GET',
       headers: {
         Authorization: `Basic ${credentials}`,
@@ -76,15 +91,20 @@ export const getNetflexCompanies = async (authTokens: NetflexAuthTokens) => {
     });
 
     if (!response.ok) {
+      logger.error(
+        'Failed to get Netflex companies.' + '\n' + `HTTP error! Status: ${response.status}`
+      );
       throw new Error(
-        'Failed to get Netflex contacts.' + '\n' + `HTTP error! Status: ${response.status}`
+        'Failed to get Netflex companies.' + '\n' + `HTTP error! Status: ${response.status}`
       );
     }
 
     const data = await response.json();
-    const contacts: NetflexContact[] = data.entries;
-    return contacts;
+    const companies: NetflexCompany[] = data.entries;
+    logger.info('Netflex companies were fetched successfully.');
+    logger.verbose(companies);
+    return companies;
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };

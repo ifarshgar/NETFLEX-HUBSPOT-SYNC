@@ -1,7 +1,8 @@
 import chalk from 'chalk';
 import { CONFIG } from './config.js';
 import { HubspotContact } from './types.js';
-import { log } from './logger.js';
+import { createLogger } from './logger.js';
+import winston from 'winston';
 
 const HubspotGetContactsUrl = 'https://api.hubapi.com/crm/v3/objects/contacts';
 const HubspotPostContactsUrl = 'https://api.hubapi.com/crm/v3/objects/contacts/batch/upsert';
@@ -9,6 +10,8 @@ const HubspotDeleteContactsUrl = 'https://api.hubapi.com/crm/v3/objects/contacts
 const BEARER_TOKEN = CONFIG.HUBSPOT_BEARER_TOKEN;
 
 export const getHubspotContacts = async () => {
+  const logger = createLogger('get_hubspot_contacts');
+  logger.info('Getting all HubSpot contacts...');
   const allContacts = [];
   let after = null;
 
@@ -28,10 +31,10 @@ export const getHubspotContacts = async () => {
       });
 
       if (!response.ok) {
-        log('------------------------------------------');
-        log('Failed to get HubSpot contacts.');
-        log(`HTTP error! Status: ${response.status.toString()}`);
-        log('------------------------------------------');
+        logger.error('------------------------------------------');
+        logger.error('Failed to get HubSpot contacts.');
+        logger.error(`HTTP error! Status: ${response.status.toString()}`);
+        logger.error('------------------------------------------');
         return;
       }
 
@@ -42,21 +45,23 @@ export const getHubspotContacts = async () => {
       after = data.paging?.next?.after || null;
     } while (after);
 
-    log(allContacts);
+    logger.info('All contacts were successfully fetched from HubSpot!');
+    logger.verbose(allContacts);
     return allContacts;
   } catch (error) {
-    console.error(error);
+    logger.error('Failed to get HubSpot contacts.');
+    logger.error(error);
   }
 };
 
-export const deleteAllHubspotContacts = async (contactIds: { id: string }[]) => {
+export const deleteAllHubspotContacts = async (contactIds: { id: string }[], logger: winston.Logger) => {
   const bodyData = {
     inputs: [...contactIds],
   };
 
-  log('Deleting the following contacts from HubSpot:');
-  log(bodyData);
-  log('------------------------------------------');
+  logger.verbose('Deleting the following contacts from HubSpot:');
+  logger.verbose(bodyData);
+  logger.verbose('------------------------------------------');
 
   try {
     const response = await fetch(HubspotDeleteContactsUrl, {
@@ -69,36 +74,29 @@ export const deleteAllHubspotContacts = async (contactIds: { id: string }[]) => 
     });
 
     if (!response.ok) {
-      // const errorData = await response.json();
-      // console.log('HubSpot API error');
-      // console.log(errorData.message);
-      // console.log('response status: ' + response.status.toString());
-      // throw new Error(`HubSpot API error: ${errorData.message || response.status}`);
-
-      log('------------------------------------------');
-      log('Failed to delete HubSpot contacts.');
-      log(`HTTP error! Status: ${response.status.toString()}`);
-      log('------------------------------------------');
+      logger.error('------------------------------------------');
+      logger.error('Failed to delete HubSpot contacts.');
+      logger.error(`HTTP error! Status: ${response.status.toString()}`);
+      logger.error('------------------------------------------');
       return;
     }
 
     const responseData = response.status === 204 ? {} : await response.json();
-    log('All contacts were successfully deleted from HubSpot!');
-    log(responseData);
+    logger.verbose(responseData);
   } catch (error) {
-    console.log('Failed to delete HubSpot contacts.');
-    console.log(error.toString());
+    logger.error('Failed to delete HubSpot contacts.');
+    logger.error(error.toString());
   }
 };
 
-export const postHubspotContacts = async (contacts: HubspotContact[]) => {
+export const postHubspotContacts = async (contacts: HubspotContact[], logger: winston.Logger) => {
   const bodyData = {
     inputs: [...contacts],
   };
 
-  log('Posting the following contacts to HubSpot:');
-  log(bodyData);
-  log('------------------------------------------');
+  logger.verbose('Posting the following contacts to HubSpot:');
+  logger.verbose(bodyData);
+  logger.verbose('------------------------------------------');
 
   try {
     const response = await fetch(HubspotPostContactsUrl, {
@@ -111,23 +109,17 @@ export const postHubspotContacts = async (contacts: HubspotContact[]) => {
     });
 
     if (!response.ok) {
-       log('------------------------------------------');
-       log('Failed to post HubSpot contacts.');
-       log(`HTTP error! Status: ${response.status.toString()}`);
-       log('------------------------------------------');
-       return;
-       
-      // const errorData = await response.json();
-      // console.log('HubSpot API error');
-      // console.log(errorData.message);
-      // console.log('response status: ' + response.status.toString());
-      // throw new Error(`HubSpot API error: ${errorData.message || response.status}`);
+      logger.error('------------------------------------------');
+      logger.error('Failed to post HubSpot contacts.');
+      logger.error(`HTTP error! Status: ${response.status.toString()}`);
+      logger.error('------------------------------------------');
+      // return;
     }
 
     const responseData = await response.json();
-    log(responseData);
+    logger.verbose(responseData);
   } catch (error) {
-    console.log('Failed to post Netflex contacts to HubSpot.');
-    console.log(error.toString());
+    logger.error('Failed to post HubSpot contacts.');
+    logger.error(error.toString());
   }
 };

@@ -1,41 +1,42 @@
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
-import { fileURLToPath } from 'url';
+import fs from 'fs';
 import path from 'path';
+import winston from 'winston';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-let logs = [];
-
-export const clearLogs = () => {
-  logs.length = 0;
+const getTimestamp = () => {
+  return new Date().toISOString().replace(/[:.]/g, '-');
 };
 
-export const log = (message: string | object) => {
-  if (typeof message === 'object') {
-    logs.push(JSON.stringify(message, null, 4));
-  } else {
-    logs.push(message);
+const getFilePath = (prefix: string) => {
+  const filename = `${prefix}_${getTimestamp()}.log`;
+  const directory = path.join(__dirname, '..', 'logs');
+
+  if (!fs.existsSync(directory)) {
+    fs.mkdirSync(directory, { recursive: true });
   }
+
+  const filePath = path.join(directory, filename);
+  return filePath;
 };
 
-export const saveLogs = (logFileName) => {
-  if (logs.length === 0) {
-    console.log('No logs to save.');
-    return;
-  }
-
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const filename = `${logFileName}_${timestamp}.log`;
-
-  const logsDir = path.join(__dirname, '..', 'logs');
-  if (!existsSync(logsDir)) {
-    mkdirSync(logsDir);
-  }
-
-  const filePath = path.join(logsDir, filename);
-  writeFileSync(filePath, logs.join('\n'), 'utf8');
-
-  console.log(`Logs saved to ${filename}`);
-  clearLogs();
+/**
+ * Creates a logger instance with a dynamic filename.
+ * @param prefix - The prefix name of the log file.
+ */
+export const createLogger = (prefix: string) => {
+  return winston.createLogger({
+    level: 'verbose',
+    format: winston.format.printf((info) => {
+      const { message } = info;
+      // Ensure objects are properly formatted
+      return typeof message === 'object' ? JSON.stringify(message, null, 4) : String(message);
+    }),
+    transports: [
+      new winston.transports.Console({ level: 'info' }),
+      new winston.transports.File({ level: 'verbose', filename: getFilePath(prefix) }),
+    ],
+  });
 };

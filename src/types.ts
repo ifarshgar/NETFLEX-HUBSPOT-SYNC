@@ -45,6 +45,19 @@ export interface NetflexContact {
   variants: any[];
 }
 
+export interface NetflexCompany {
+  id: string;
+  directoryId: string;
+  name: string;
+  title: string | null;
+  url: string;
+  revision: string;
+  created: string;
+  updated: string;
+  published: string;
+  author: string | null;
+}
+
 export type HubspotContact = {
   id: string;
   idProperty: string;
