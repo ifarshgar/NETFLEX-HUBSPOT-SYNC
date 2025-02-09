@@ -33,8 +33,11 @@ export const getUniqueNetflexContacts = (netflexContacts: NetflexContact[]) => {
   const uniqueContacts = new Map();
 
   for(const contact of netflexContacts) {
+    let email = contact.email;
+    if(email === '') email = contact.id;
+
     if(!uniqueContacts.has(contact.email)) {
-      uniqueContacts.set(contact.id, contact);
+      uniqueContacts.set(email, contact);
     }
   }
   return Array.from(uniqueContacts.values());
