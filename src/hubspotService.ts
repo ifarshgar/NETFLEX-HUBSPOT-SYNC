@@ -1,8 +1,8 @@
 import chalk from 'chalk';
 import { CONFIG } from './config.js';
 import { HubspotContact } from './types.js';
-import { createLogger } from './logger.js';
 import winston from 'winston';
+import { logger } from './logger.js';
 
 const HubspotGetContactsUrl = 'https://api.hubapi.com/crm/v3/objects/contacts';
 const HubspotPostContactsUrl = 'https://api.hubapi.com/crm/v3/objects/contacts/batch/upsert';
@@ -10,7 +10,6 @@ const HubspotDeleteContactsUrl = 'https://api.hubapi.com/crm/v3/objects/contacts
 const BEARER_TOKEN = CONFIG.HUBSPOT_BEARER_TOKEN;
 
 export const getHubspotContacts = async () => {
-  const logger = createLogger('get_hubspot_contacts');
   logger.info('Getting all HubSpot contacts...');
   const allContacts = [];
   let after = null;

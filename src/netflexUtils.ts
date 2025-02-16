@@ -1,45 +1,27 @@
-import { createLogger } from './logger.js';
+import winston from 'winston';
 import { getNetflexAuthTokens, getNetflexContacts } from './netflexService.js';
 import { NetflexContact } from './types.js';
 
-export const getFilteredNetflexContacts = async (
-  createdAfter = '2020-01-01T00:00:00',
-  BATCH_LIMIT = 100
-) => {
-  const netflexAuthTokens = await getNetflexAuthTokens();
-  const netflexContacts = await getNetflexContacts(netflexAuthTokens);
+export const getFilteredNetflexContacts = async (logger: winston.Logger) => {
+  const authTokens = await getNetflexAuthTokens();
+  const netflexContacts = await getNetflexContacts(authTokens, 'created:>2025-02-12');
 
-  // filtering customers that were created after a certain date
-  const cutoffDate = new Date(createdAfter);
-  const filteredNetflexContacts = netflexContacts.filter((customer) => {
-    const createdDate = new Date(customer.created);
-    return createdDate >= cutoffDate;
-  });
+  // filtering out duplicate contacts that have the same email address
+  const uniqueNetflexContacts = getUniqueNetflexContacts(netflexContacts);
 
-  // filtering out duplicate customers that have the same email address 
-  const filteredAndUniqueNetflexContacts = getUniqueNetflexContacts(filteredNetflexContacts);
-
-  const netflexContactsList = [];
-  for (let i = 0; i < filteredAndUniqueNetflexContacts.length; i += BATCH_LIMIT) {
-    if (i % BATCH_LIMIT === 0) {
-      netflexContactsList.push(filteredAndUniqueNetflexContacts.slice(i, i + BATCH_LIMIT));
-    }
-  }
-
-  return netflexContactsList;
+  return uniqueNetflexContacts;
 };
 
 export const getUniqueNetflexContacts = (netflexContacts: NetflexContact[]) => {
   const uniqueContacts = new Map();
 
-  for(const contact of netflexContacts) {
-    let email = contact.email;
-    if(email === '') email = contact.id;
-
-    if(!uniqueContacts.has(contact.email)) {
+  for (const contact of netflexContacts) {
+    const email = contact.email || contact.id;
+    const existingContact = uniqueContacts.get(email);
+    if (!existingContact || new Date(contact.created) > new Date(existingContact.created)) {
       uniqueContacts.set(email, contact);
     }
   }
+
   return Array.from(uniqueContacts.values());
 };
-

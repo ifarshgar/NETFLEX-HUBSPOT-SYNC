@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import winston from 'winston';
 import { fileURLToPath } from 'url';
+import chalk from 'chalk';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,7 +33,7 @@ export const createLogger = (prefix: string) => {
     format: winston.format.printf((info) => {
       const { message } = info;
       // Ensure objects are properly formatted
-      return typeof message === 'object' ? JSON.stringify(message, null, 4) : String(message);
+      return typeof message === 'object' ? JSON.stringify(message, null, 4) : chalk.cyan(String(message));
     }),
     transports: [
       new winston.transports.Console({ level: 'info' }),
@@ -40,3 +41,5 @@ export const createLogger = (prefix: string) => {
     ],
   });
 };
+
+export const logger = createLogger('app-log');

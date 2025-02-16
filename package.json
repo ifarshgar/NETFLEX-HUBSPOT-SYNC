@@ -8,6 +8,7 @@
     "start": "tsc && node dist/app.js",
     "launch": "node src/app.ts",
     "build": "tsc",
+    "clean": "rm -r logs dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -17,6 +18,8 @@
   "dependencies": {
     "chalk": "^5.4.1",
     "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
+    "csv-stringify": "^6.5.2",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "winston": "^3.17.0"
